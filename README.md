@@ -40,11 +40,11 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - Large batch and a coarse StepLR schedule converge stably but may land in a flatter-yet-not-optimal region.
   - Parameter count is higher than necessary for MNIST given the target, leaving room to tighten the architecture.
 
-<!-- OLD: No Snapshot (Targets/Results/Analysis/File Link) block under Scenario 1 -->
+<!-- OLD: Generic snapshot values copied verbatim -->
 #### Snapshot — Targets, Results, Analysis
-- **Targets**: Target was to build the skeleton, add all proper layers, and get a model below 100k parameters
-- **Results**: Got the model which had 98,000 parameters, 99.9% train and 98.9% test accuracy
-- **Analysis**: Good structure, model is over-fitting, now next step would be to reduce the parameters
+- **Targets**: Build the skeleton with proper layers and stay under 100k parameters (baseline establishment).
+- **Results**: 9,822 parameters; train max 98.35% (epoch 18); test max 99.14% (epochs 17–19), ~98.9% by epoch ~11.
+- **Analysis**: Strong structure and stable convergence but below 99.4%; schedule is coarse and head minimal. Next, tighten capacity and upgrade LR scheduling.
 - **File Link**: [pidooma.com](https://www.pidooma.com)
 
 ### Scenario 2: Parameter-efficient CNN + OneCycle (SGD) (≈99.2%)
@@ -68,11 +68,11 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - **Capacity control** via 1×1 transitions and narrower channels reduces overfitting and focuses representational power.
   - Returning **logits** pairs correctly with CrossEntropyLoss (numerically stable and conventional), avoiding any potential mismatch with pre-applied log-softmax.
 
-<!-- OLD: No Snapshot (Targets/Results/Analysis/File Link) block under Scenario 2 -->
+<!-- OLD: Generic snapshot values copied verbatim -->
 #### Snapshot — Targets, Results, Analysis
-- **Targets**: Target was to build the skeleton, add all proper layers, and get a model below 100k parameters
-- **Results**: Got the model which had 98,000 parameters, 99.9% train and 98.9% test accuracy
-- **Analysis**: Good structure, model is over-fitting, now next step would be to reduce the parameters
+- **Targets**: Go under 8k parameters and recover/improve accuracy using a better schedule.
+- **Results**: 5,512 parameters; train max 98.59% (epoch 13); test max 99.24% (epoch 15).
+- **Analysis**: OneCycle with SGD improved generalization and peak accuracy; still shy of 99.4%. Post-GAP head and milder dropout are the next levers.
 - **File Link**: [pidooma.com](https://www.pidooma.com)
 
 ### Scenario 3: Head refinement + smaller batch + tuned regularization (≈99.5%)
@@ -91,11 +91,11 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - **Lower dropout** avoids underfitting while augmentations still regularize.
   - **Adam + OneCycle** provides adaptive per-parameter step sizes while still following a well-shaped LR schedule.
 
-<!-- OLD: No Snapshot (Targets/Results/Analysis/File Link) block under Scenario 3 -->
+<!-- OLD: Generic snapshot values copied verbatim -->
 #### Snapshot — Targets, Results, Analysis
-- **Targets**: Target was to build the skeleton, add all proper layers, and get a model below 100k parameters
-- **Results**: Got the model which had 98,000 parameters, 99.9% train and 98.9% test accuracy
-- **Analysis**: Good structure, model is over-fitting, now next step would be to reduce the parameters
+- **Targets**: Achieve ≥99.4% in <15 epochs, maintain ≥99.4% through epoch 15, under 8k parameters.
+- **Results**: 7,592 parameters; train max 99.14% (epoch 16); test 99.42–99.54% by epochs 11–15, sustained ≥99.4% to epoch 15.
+- **Analysis**: Post-GAP 1×1 head + smaller batch + reduced dropout + Adam OneCycle delivered the final push and stability.
 - **File Link**: [pidooma.com](https://www.pidooma.com)
 
 
