@@ -6,9 +6,9 @@ This document explains what changed across the three MNIST scenarios and why tho
 **Final target**: Achieve ≥99.4% test accuracy in < 15 epochs and maintain ≥99.4% consistently through the 15th epoch, with model size under 8k parameters.
 
 ### What’s here
-- `notebooks/erav4_session6_scenario_1.ipynb`
-- `notebooks/erav4_session6_scenario_2.ipynb`
-- `notebooks/erav4_session6_scenario_3.ipynb`
+- `notebooks/erav4_session6_scenario_1.ipynb` with `model1.py` and `train1.py`
+- `notebooks/erav4_session6_scenario_2.ipynb` with `model2.py` and `train2.py`
+- `notebooks/erav4_session6_scenario_3.ipynb` with `model3.py` and `train3.py`
 
 All three scenarios use MNIST with light data augmentation and a compact CNN trained end-to-end using a Global Average Pooling (GAP) based classifier head.
 
