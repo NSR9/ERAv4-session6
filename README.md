@@ -72,13 +72,68 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - **Lower dropout** avoids underfitting while augmentations still regularize.
   - **Adam + OneCycle** provides adaptive per-parameter step sizes while still following a well-shaped LR schedule.
 
+<!-- OLD: no strategy-mapping section existed below -->
+### Strategy mapping (Code 1–10)
+
+For each scenario, here’s how the implementation aligns with the 10-step strategy you followed:
+
+#### Scenario 1
+- Code 1 — Set up: Standard PyTorch + torchvision MNIST pipeline
+- Code 2 — Basic Skeleton: CNN with stacked 3×3 convs and BN
+- Code 3 — Lighter Model: Moderate baseline capacity (not aggressively reduced)
+- Code 4 — Batch Normalization: BN after most convs
+- Code 5 — Regularization: Dropout ≈ 0.05–0.10
+- Code 6 — Global Average Pooling: GAP used; 10 channels map to 10 classes
+- Code 7 — Increasing Capacity: Modest width (up to 16 ch); two pooling stages
+- Code 8 — Correct MaxPooling Location: MaxPool after blocks (conv2, conv4)
+- Code 9 — Image Augmentation: CenterCrop(22)@p=0.1, Rotation(±15°), Normalize
+- Code 10 — Playing naively with Learning Rates: Adam + StepLR(γ=0.1 every 15)
+
+Key highlights: Larger baseline model, GAP yes, no post-GAP 1×1, Batch=512, Adam(lr=0.001) + StepLR.
+
+#### Scenario 2
+- Code 1 — Set up: Same as S1
+- Code 2 — Basic Skeleton: Streamlined skeleton with explicit transition 1×1 layers
+- Code 3 — Lighter Model: Yes — narrowed channels + 1×1 transitions (target <8k params)
+- Code 4 — Batch Normalization: BN after most convs
+- Code 5 — Regularization: Dropout=0.10
+- Code 6 — Global Average Pooling: GAP used; classification via flatten from GAP
+- Code 7 — Increasing Capacity: Balanced; brief bump to 16 ch, then down to 10
+- Code 8 — Correct MaxPooling Location: Two MaxPools placed after transition blocks
+- Code 9 — Image Augmentation: Same as S1
+- Code 10 — Playing naively with Learning Rates: SGD + OneCycleLR (cos), max_lr≈0.08, base_lr≈0.025
+
+Key highlights: Parameter-efficient (<8k), GAP yes, post-GAP 1×1 defined but not used in forward, Batch=512, SGD + OneCycle.
+
+#### Scenario 3
+- Code 1 — Set up: Same as S1/S2
+- Code 2 — Basic Skeleton: Similar skeleton with selective valid convs (padding=0) for spatial squeeze
+- Code 3 — Lighter Model: Compact budget retained (≲8k) with improved head
+- Code 4 — Batch Normalization: BN after most convs
+- Code 5 — Regularization: Dropout=0.025 (reduced to avoid underfit); smaller batch for implicit regularization
+- Code 6 — Global Average Pooling: GAP used
+- Code 7 — Increasing Capacity: Mild rebalancing of channels (peak 16 → 12 → 10)
+- Code 8 — Correct MaxPooling Location: Two MaxPools as before
+- Code 9 — Image Augmentation: Same as S1/S2
+- Code 10 — Playing naively with Learning Rates: Adam + OneCycleLR (cos), max_lr≈0.01, base_lr=0.001
+
+Key highlights: Compact model, GAP yes, explicit post-GAP 1×1 head, Batch=64, Adam + OneCycle.
+
 ## Key comparisons at a glance
 
+<!-- OLD TABLE:
 | Scenario | Batch | Optimizer | Scheduler     | Epochs | Max LR | Dropout | Classifier head            | Peak test acc |
 |---|---:|---|---|---:|---:|---:|---|---:|
 | 1 | 512 | Adam     | StepLR(15, 0.1) | 20 | —    | ~0.05–0.10 | GAP → flatten (log_softmax) | ~98.98% |
 | 2 | 512 | SGD      | OneCycle (cos)  | 16 | ~0.08 | 0.10  | GAP → flatten (logits)      | ~99.21% |
 | 3 | 64  | Adam     | OneCycle (cos)  | 16 | ~0.01 | 0.025 | GAP → 1×1 conv → flatten    | ~99.49% |
+-->
+
+| Scenario | Model size | GAP | Post-GAP layer | Optimizer | Base LR | Max LR | Scheduler       | Batch | Epochs | Dropout | Peak test acc |
+|---|---|---|---|---|---:|---:|---|---:|---:|---:|---:|
+| 1 | Larger baseline | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
+| 2 | < 8k params (target) | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
+| 3 | Compact (≲8k) | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
 
 Notes:
 - Parameter count is reduced from Scenario 1 to 2 via narrower channels and 1×1 transitions; Scenario 3 keeps the model compact while refining the head.
@@ -101,6 +156,5 @@ Notes:
 - Experiment with **SGD + OneCycle** in Scenario 3 as a comparison to Adam + OneCycle.
 - Replace ReLU with **Mish/SiLU**; test slightly deeper stacks under the same param budget.
 - Add **weight decay** sweeps (1e-4…1e-2) with OneCycle to probe generalization further.
-
 
 
