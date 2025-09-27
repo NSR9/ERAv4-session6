@@ -80,13 +80,33 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
 
 | Scenario | Model size | GAP | Post-GAP layer | Optimizer | Base LR | Max LR | Scheduler       | Batch | Epochs | Dropout | Peak test acc |
 |---|---|---|---|---|---:|---:|---|---:|---:|---:|---:|
-| 1 | Larger baseline | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
-| 2 | < 8k params (target) | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
-| 3 | Compact (≲8k) | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
+| 1 | 9.5k | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
+| 2 | 5112 params(< 8k params (target)) | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
+| 3 | 7592 (≲8k) | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
 
 Notes:
 - Parameter count is reduced from Scenario 1 to 2 via narrower channels and 1×1 transitions; Scenario 3 keeps the model compact while refining the head.
 - All scenarios use similar augmentations; Scenario 3 benefits more from smaller batch and tuned dropout.
+
+## Accuracy extremes by scenario
+
+<!-- OLD: No explicit highest/lowest accuracy summary existed -->
+
+| Scenario | Test accuracy MIN (epoch) | Test accuracy MAX (epoch) | Train accuracy MIN (epoch) | Train accuracy MAX (epoch) |
+|---|---|---|---|---|
+| 1 | 94.82% (epoch 1) | 99.14% (epochs 17, 19) | — | — |
+| 2 | 89.99% (epoch 1, first run) / 92.08% (epoch 1, OneCycle run) | 99.24% (epoch 15, OneCycle run) | — | — |
+| 3 | 97.60% (epoch 3) | 99.54% (epoch 15) | — | — |
+
+Notes:
+- Train accuracies are stored in `train_acc` lists in the notebooks but not printed per epoch. To populate the train MIN/MAX with exact epochs, run the notebooks and print `min(train_acc)`, `max(train_acc)` with their indices. Example helper snippet:
+
+```python
+best = max(enumerate(train_acc, start=1), key=lambda x: x[1])
+worst = min(enumerate(train_acc, start=1), key=lambda x: x[1])
+print("Train MIN:", f"{worst[1]:.2f}% at epoch {worst[0]}")
+print("Train MAX:", f"{best[1]:.2f}% at epoch {best[0]}")
+```
 
 
 
