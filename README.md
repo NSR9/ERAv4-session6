@@ -90,13 +90,12 @@ Notes:
 
 ## Accuracy extremes by scenario
 
-<!-- OLD: No explicit highest/lowest accuracy summary existed -->
 
-| Scenario | Test accuracy MIN (epoch) | Test accuracy MAX (epoch) |
-|---|---|---|
-| 1 | 94.82% (epoch 1) | 99.14% (epochs 17, 19)
-| 2 | 89.99% (epoch 1, first run) / 92.08% (epoch 1, OneCycle run) | 99.24% (epoch 15, OneCycle run)
-| 3 | 97.60% (epoch 3) | 99.54% (epoch 15)
+| Scenario | Test accuracy MIN (epoch) | Test accuracy MAX (epoch) | Train accuracy MIN (epoch) | Train accuracy MAX (epoch) |
+|---|---|---|---|---|
+| 1 | 94.82% (epoch 1) | 99.14% (epochs 17, 19) | 72.33% (epoch 1) | 98.35% (epoch 18) |
+| 2 | 89.99% (epoch 1, first run) / 92.08% (epoch 1, OneCycle run) | 99.24% (epoch 15, OneCycle run) | 66.47% (epoch 1) | 98.59% (epoch 13) |
+| 3 | 97.60% (epoch 3) | 99.54% (epoch 15) | 87.82% (epoch 1) | 99.14% (epoch 16) |
 
 
 
