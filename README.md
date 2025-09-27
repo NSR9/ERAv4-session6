@@ -1,6 +1,9 @@
 ## Session 6 Notebooks: Scenario 1 → 2 → 3
 
+<!-- OLD: Intro without explicit final target -->
 This document explains what changed across the three MNIST scenarios and why those changes improved accuracy. It also provides quick steps to run the notebooks and a compact comparison table.
+
+**Final target**: Achieve ≥99.4% test accuracy in < 15 epochs and maintain ≥99.4% consistently through the 15th epoch, with model size under 8k parameters.
 
 ### What’s here
 - `notebooks/erav4_session6_scenario_1.ipynb`
@@ -72,68 +75,62 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - **Lower dropout** avoids underfitting while augmentations still regularize.
   - **Adam + OneCycle** provides adaptive per-parameter step sizes while still following a well-shaped LR schedule.
 
-<!-- OLD: no strategy-mapping section existed below -->
-### Strategy mapping (Code 1–10)
+## Targets and analysis per scenario
 
-For each scenario, here’s how the implementation aligns with the 10-step strategy you followed:
+<!-- OLD: No explicit targets/analysis section existed -->
 
-#### Scenario 1
-- Code 1 — Set up: Standard PyTorch + torchvision MNIST pipeline
-- Code 2 — Basic Skeleton: CNN with stacked 3×3 convs and BN
-- Code 3 — Lighter Model: Moderate baseline capacity (not aggressively reduced)
-- Code 4 — Batch Normalization: BN after most convs
-- Code 5 — Regularization: Dropout ≈ 0.05–0.10
-- Code 6 — Global Average Pooling: GAP used; 10 channels map to 10 classes
-- Code 7 — Increasing Capacity: Modest width (up to 16 ch); two pooling stages
-- Code 8 — Correct MaxPooling Location: MaxPool after blocks (conv2, conv4)
-- Code 9 — Image Augmentation: CenterCrop(22)@p=0.1, Rotation(±15°), Normalize
-- Code 10 — Playing naively with Learning Rates: Adam + StepLR(γ=0.1 every 15)
+### Scenario 1 — Targets and analysis
+- **Target for this step**: Establish a strong baseline; probe ceiling with Adam + StepLR.
+- **Configuration**:
+  - **Model size**: Larger baseline (not <8k)
+  - **GAP**: Yes
+  - **Post-GAP layer**: No
+  - **Optimizer/Scheduler**: Adam (base lr=0.001) + StepLR(step=15, γ=0.1)
+  - **Batch / Epochs**: 512 / 20
+- **Result**: Peak ≈98.98% by ~10–12 epochs; does not reach 99.4%.
+- **Analysis vs final target**:
+  - Misses accuracy target; capacity not the issue—schedule and head likely bottlenecks.
+  - Adam + coarse StepLR less effective than dynamic schedules for finding sharper optima.
 
-Key highlights: Larger baseline model, GAP yes, no post-GAP 1×1, Batch=512, Adam(lr=0.001) + StepLR.
+### Scenario 2 — Targets and analysis
+- **Target for this step**: Cut parameters to <8k while recovering/improving accuracy via better schedule.
+- **Configuration**:
+  - **Model size**: Parameter-efficient (<8k target)
+  - **GAP**: Yes
+  - **Post-GAP layer**: Defined but not used in `forward` (GAP → flatten)
+  - **Optimizer/Scheduler**: SGD (mom=0.9, base lr≈0.025) + OneCycleLR(cos, max_lr≈0.08)
+  - **Batch / Epochs**: 512 / 16
+- **Result**: Peak ≈99.21% within 16 epochs; improved but still below 99.4%.
+- **Analysis vs final target**:
+  - Meets parameter target; schedule upgrade to OneCycleLR clearly helps.
+  - Lacks a slightly more expressive classifier head; dropout may be a touch high for MNIST.
 
-#### Scenario 2
-- Code 1 — Set up: Same as S1
-- Code 2 — Basic Skeleton: Streamlined skeleton with explicit transition 1×1 layers
-- Code 3 — Lighter Model: Yes — narrowed channels + 1×1 transitions (target <8k params)
-- Code 4 — Batch Normalization: BN after most convs
-- Code 5 — Regularization: Dropout=0.10
-- Code 6 — Global Average Pooling: GAP used; classification via flatten from GAP
-- Code 7 — Increasing Capacity: Balanced; brief bump to 16 ch, then down to 10
-- Code 8 — Correct MaxPooling Location: Two MaxPools placed after transition blocks
-- Code 9 — Image Augmentation: Same as S1
-- Code 10 — Playing naively with Learning Rates: SGD + OneCycleLR (cos), max_lr≈0.08, base_lr≈0.025
+### Scenario 3 — Targets and analysis
+- **Target for this step**: Break 99.4% before 15 epochs and maintain ≥99.4% through epoch 15 with <8k params.
+- **Configuration**:
+  - **Model size**: Compact (≲8k)
+  - **GAP**: Yes
+  - **Post-GAP layer**: Yes (1×1 conv head used after GAP)
+  - **Optimizer/Scheduler**: Adam (base lr=0.001) + OneCycleLR(cos, max_lr≈0.01)
+  - **Batch / Epochs**: 64 / 16
+  - **Regularization**: Dropout=0.025 (reduced from 0.10), same augmentations
+- **Result**:
+  - Reaches ≈99.42–99.49% by epochs 11–12.
+  - Maintains ≳99.4% through the remaining epochs (up to 16 in the run shown).
+- **Analysis vs final target**:
+  - Final target ACHIEVED: ≥99.4% before 15 epochs and maintained to 15 with <8k params.
+  - Drivers: Post-GAP 1×1 head, smaller batch for better generalization, reduced dropout, adaptive Adam with OneCycle schedule.
 
-Key highlights: Parameter-efficient (<8k), GAP yes, post-GAP 1×1 defined but not used in forward, Batch=512, SGD + OneCycle.
-
-#### Scenario 3
-- Code 1 — Set up: Same as S1/S2
-- Code 2 — Basic Skeleton: Similar skeleton with selective valid convs (padding=0) for spatial squeeze
-- Code 3 — Lighter Model: Compact budget retained (≲8k) with improved head
-- Code 4 — Batch Normalization: BN after most convs
-- Code 5 — Regularization: Dropout=0.025 (reduced to avoid underfit); smaller batch for implicit regularization
-- Code 6 — Global Average Pooling: GAP used
-- Code 7 — Increasing Capacity: Mild rebalancing of channels (peak 16 → 12 → 10)
-- Code 8 — Correct MaxPooling Location: Two MaxPools as before
-- Code 9 — Image Augmentation: Same as S1/S2
-- Code 10 — Playing naively with Learning Rates: Adam + OneCycleLR (cos), max_lr≈0.01, base_lr=0.001
 
 Key highlights: Compact model, GAP yes, explicit post-GAP 1×1 head, Batch=64, Adam + OneCycle.
 
 ## Key comparisons at a glance
 
-<!-- OLD TABLE:
-| Scenario | Batch | Optimizer | Scheduler     | Epochs | Max LR | Dropout | Classifier head            | Peak test acc |
-|---|---:|---|---|---:|---:|---:|---|---:|
-| 1 | 512 | Adam     | StepLR(15, 0.1) | 20 | —    | ~0.05–0.10 | GAP → flatten (log_softmax) | ~98.98% |
-| 2 | 512 | SGD      | OneCycle (cos)  | 16 | ~0.08 | 0.10  | GAP → flatten (logits)      | ~99.21% |
-| 3 | 64  | Adam     | OneCycle (cos)  | 16 | ~0.01 | 0.025 | GAP → 1×1 conv → flatten    | ~99.49% |
--->
-
-| Scenario | Model size | GAP | Post-GAP layer | Optimizer | Base LR | Max LR | Scheduler       | Batch | Epochs | Dropout | Peak test acc |
-|---|---|---|---|---|---:|---:|---|---:|---:|---:|---:|
-| 1 | Larger baseline | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
-| 2 | < 8k params (target) | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
-| 3 | Compact (≲8k) | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
+| Scenario | Params (torchsummary) | GAP | Post-GAP layer | Optimizer | Base LR | Max LR | Scheduler       | Batch | Epochs | Dropout | Peak test acc |
+|---|---:|---|---|---|---:|---:|---|---:|---:|---:|---:|
+| 1 | 9,822 | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
+| 2 | 5,512 | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
+| 3 | 7,592 | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
 
 Notes:
 - Parameter count is reduced from Scenario 1 to 2 via narrower channels and 1×1 transitions; Scenario 3 keeps the model compact while refining the head.
