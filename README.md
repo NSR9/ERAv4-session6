@@ -92,21 +92,14 @@ Notes:
 
 <!-- OLD: No explicit highest/lowest accuracy summary existed -->
 
-| Scenario | Test accuracy MIN (epoch) | Test accuracy MAX (epoch) | Train accuracy MIN (epoch) | Train accuracy MAX (epoch) |
-|---|---|---|---|---|
-| 1 | 94.82% (epoch 1) | 99.14% (epochs 17, 19) | — | — |
-| 2 | 89.99% (epoch 1, first run) / 92.08% (epoch 1, OneCycle run) | 99.24% (epoch 15, OneCycle run) | — | — |
-| 3 | 97.60% (epoch 3) | 99.54% (epoch 15) | — | — |
+| Scenario | Test accuracy MIN (epoch) | Test accuracy MAX (epoch) |
+|---|---|---|
+| 1 | 94.82% (epoch 1) | 99.14% (epochs 17, 19)
+| 2 | 89.99% (epoch 1, first run) / 92.08% (epoch 1, OneCycle run) | 99.24% (epoch 15, OneCycle run)
+| 3 | 97.60% (epoch 3) | 99.54% (epoch 15)
 
-Notes:
-- Train accuracies are stored in `train_acc` lists in the notebooks but not printed per epoch. To populate the train MIN/MAX with exact epochs, run the notebooks and print `min(train_acc)`, `max(train_acc)` with their indices. Example helper snippet:
 
-```python
-best = max(enumerate(train_acc, start=1), key=lambda x: x[1])
-worst = min(enumerate(train_acc, start=1), key=lambda x: x[1])
-print("Train MIN:", f"{worst[1]:.2f}% at epoch {worst[0]}")
-print("Train MAX:", f"{best[1]:.2f}% at epoch {best[0]}")
-```
+
 
 
 
