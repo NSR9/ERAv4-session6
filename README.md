@@ -45,7 +45,7 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
 - **Targets**: Build the skeleton with proper layers and stay under 100k parameters (baseline establishment).
 - **Results**: 9,822 parameters; train max 98.35% (epoch 18); test max 99.14% (epochs 17–19), ~98.9% by epoch ~11.
 - **Analysis**: Strong structure and stable convergence but below 99.4%; schedule is coarse and head minimal. Next, tighten capacity and upgrade LR scheduling.
-- Here is how I decided the number of params for this model [PIDODMA]([https://www.pidooma.com](https://rationalwiki.org/wiki/PIDOOMA))
+- Here is how I decided the number of params for this model - [PIDODMA.com]([https://www.pidooma.com](https://rationalwiki.org/wiki/PIDOOMA))
 
 ### Scenario 2: Parameter-efficient CNN + OneCycle (SGD) (≈99.2%)
 - **Design goals** (notebook notes):
