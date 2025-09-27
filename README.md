@@ -75,6 +75,7 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - **Lower dropout** avoids underfitting while augmentations still regularize.
   - **Adam + OneCycle** provides adaptive per-parameter step sizes while still following a well-shaped LR schedule.
 
+
 ## Targets and analysis per scenario
 
 | Scenario | Model size | GAP | Post-GAP layer | Optimizer | Base LR | Max LR | Scheduler       | Batch | Epochs | Dropout | Peak test acc |
@@ -86,6 +87,43 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
 Notes:
 - Parameter count is reduced from Scenario 1 to 2 via narrower channels and 1×1 transitions; Scenario 3 keeps the model compact while refining the head.
 - All scenarios use similar augmentations; Scenario 3 benefits more from smaller batch and tuned dropout.
+
+
+
+## The story: how I reached Scenario 3
+
+### Prologue — aiming for 99.4% under 8k
+I set a concrete target early: break ≥99.4% test accuracy in fewer than 15 epochs, keep it ≥99.4% through epoch 15, and stay under 8k parameters. This constraint guided every change.
+
+### Chapter 1 — Scenario 1: the dependable baseline
+I began with a familiar CNN: stacks of 3×3 convs with BN and small dropout, two pooling stages, GAP to 10 channels, and Adam + StepLR. It quickly reached ~98.9% and then plateaued. That stall said two things: the network had enough capacity for MNIST, but the learning-rate schedule and the last-mile mapping (GAP → flatten) likely limited further gains.
+
+What I learned:
+- Coarse StepLR didn’t explore and anneal as effectively; it converged safely, not optimally.
+- The head had minimal expressivity; a post-GAP 1×1 could help without adding many params.
+
+### Chapter 2 — Scenario 2: slimming down and pacing better
+Next I reduced parameters with narrower channels and 1×1 transitions, and I switched to OneCycleLR with SGD. Training felt livelier and accuracy climbed to ~99.21%. Under 8k params was achieved without sacrificing performance.
+
+What I learned:
+- OneCycleLR’s warmup and cosine cooldown helped optimization discover better basins.
+- The compact trunk generalized well, but the classifier head still felt tight, and dropout at 0.10 looked slightly heavy for MNIST.
+
+Decision point:
+- Add a light post-GAP 1×1 conv for a smarter head.
+- Reduce dropout and try smaller batches to increase gradient noise (regularization) while keeping schedule benefits.
+
+### Chapter 3 — Scenario 3: the last-mile refinement
+I added the post-GAP 1×1 conv, reduced dropout to 0.025, shrank batch size to 64, and paired the setup with Adam + OneCycle at a modest max_lr (~0.01). The result crossed 99.4% around epochs 11–12 and stayed there through epoch 15, satisfying all constraints (params=7,592).
+
+Why it worked:
+- The 1×1 head improved the mapping from global features to logits with negligible params.
+- Smaller batches plus reduced dropout struck a better bias–variance balance.
+- OneCycle retained its convergence benefits; Adam at lower max_lr behaved smoothly with the smaller batch.
+
+### Epilogue — what I’d keep and try next
+- Keep: GAP-based trunk, parameter-efficient design, post-GAP 1×1 head, OneCycle schedule, smaller batch.
+- Try next: label smoothing, mild weight decay sweeps, compare SGD+OneCycle vs Adam+OneCycle on this final architecture.
 
 ## Practical guidance and takeaways
 - Prefer returning **logits** from the model and use `CrossEntropyLoss`.
