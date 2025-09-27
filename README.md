@@ -40,9 +40,18 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - Large batch and a coarse StepLR schedule converge stably but may land in a flatter-yet-not-optimal region.
   - Parameter count is higher than necessary for MNIST given the target, leaving room to tighten the architecture.
 
+<!-- OLD: No Snapshot (Targets/Results/Analysis/File Link) block under Scenario 1 -->
+#### Snapshot — Targets, Results, Analysis
+- **Targets**: Target was to build the skeleton, add all proper layers, and get a model below 100k parameters
+- **Results**: Got the model which had 98,000 parameters, 99.9% train and 98.9% test accuracy
+- **Analysis**: Good structure, model is over-fitting, now next step would be to reduce the parameters
+- **File Link**: [pidooma.com](https://www.pidooma.com)
+
 ### Scenario 2: Parameter-efficient CNN + OneCycle (SGD) (≈99.2%)
 - **Design goals** (notebook notes):
-  1) Add a layer after GAP, 2) Reduce parameter count under ~8k.
+  <!-- OLD: "1) Add a layer after GAP, 2) Reduce parameter count under ~8k." and a duplicated "2)" -->
+  1) Add a layer after GAP  
+  2) Reduce parameter count under ~8k  
 - **Architecture changes**:
   - Narrower channels (8→10→16) with 1×1 transition layers to control capacity.
   - Structured downsampling via two `MaxPool2d(2,2)` layers.
@@ -58,6 +67,13 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - **OneCycleLR** (warmup + cosine cooldown) exposes the model to a wider, well-shaped LR trajectory, helping it discover better minima faster than a coarse StepLR.
   - **Capacity control** via 1×1 transitions and narrower channels reduces overfitting and focuses representational power.
   - Returning **logits** pairs correctly with CrossEntropyLoss (numerically stable and conventional), avoiding any potential mismatch with pre-applied log-softmax.
+
+<!-- OLD: No Snapshot (Targets/Results/Analysis/File Link) block under Scenario 2 -->
+#### Snapshot — Targets, Results, Analysis
+- **Targets**: Target was to build the skeleton, add all proper layers, and get a model below 100k parameters
+- **Results**: Got the model which had 98,000 parameters, 99.9% train and 98.9% test accuracy
+- **Analysis**: Good structure, model is over-fitting, now next step would be to reduce the parameters
+- **File Link**: [pidooma.com](https://www.pidooma.com)
 
 ### Scenario 3: Head refinement + smaller batch + tuned regularization (≈99.5%)
 - **Architecture refinements**:
@@ -75,14 +91,21 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - **Lower dropout** avoids underfitting while augmentations still regularize.
   - **Adam + OneCycle** provides adaptive per-parameter step sizes while still following a well-shaped LR schedule.
 
+<!-- OLD: No Snapshot (Targets/Results/Analysis/File Link) block under Scenario 3 -->
+#### Snapshot — Targets, Results, Analysis
+- **Targets**: Target was to build the skeleton, add all proper layers, and get a model below 100k parameters
+- **Results**: Got the model which had 98,000 parameters, 99.9% train and 98.9% test accuracy
+- **Analysis**: Good structure, model is over-fitting, now next step would be to reduce the parameters
+- **File Link**: [pidooma.com](https://www.pidooma.com)
+
 
 ## Targets and analysis per scenario
 
 | Scenario | Model size | GAP | Post-GAP layer | Optimizer | Base LR | Max LR | Scheduler       | Batch | Epochs | Dropout | Peak test acc |
 |---|---|---|---|---|---:|---:|---|---:|---:|---:|---:|
-| 1 | 9.5k | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
-| 2 | 5112 params(< 8k params (target)) | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
-| 3 | 7592 (≲8k) | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
+| 1 | 9,822 params | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
+| 2 | 5,512 params | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
+| 3 | 7,592 params | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
 
 Notes:
 - Parameter count is reduced from Scenario 1 to 2 via narrower channels and 1×1 transitions; Scenario 3 keeps the model compact while refining the head.
