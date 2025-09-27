@@ -75,16 +75,13 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
   - **Lower dropout** avoids underfitting while augmentations still regularize.
   - **Adam + OneCycle** provides adaptive per-parameter step sizes while still following a well-shaped LR schedule.
 
+## Targets and analysis per scenario
 
-Key highlights: Compact model, GAP yes, explicit post-GAP 1×1 head, Batch=64, Adam + OneCycle.
-
-## Key comparisons at a glance
-
-| Scenario | Params (torchsummary) | GAP | Post-GAP layer | Optimizer | Base LR | Max LR | Scheduler       | Batch | Epochs | Dropout | Peak test acc |
-|---|---:|---|---|---|---:|---:|---|---:|---:|---:|---:|
-| 1 | 9,822 | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
-| 2 | 5,512 | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
-| 3 | 7,592 | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
+| Scenario | Model size | GAP | Post-GAP layer | Optimizer | Base LR | Max LR | Scheduler       | Batch | Epochs | Dropout | Peak test acc |
+|---|---|---|---|---|---:|---:|---|---:|---:|---:|---:|
+| 1 | Larger baseline | Yes | No | Adam | 0.001 | — | StepLR(15, γ=0.1) | 512 | 20 | ~0.05–0.10 | ~98.98% |
+| 2 | < 8k params (target) | Yes | No (defined, unused) | SGD (mom=0.9) | 0.025 | ~0.08 | OneCycle (cos) | 512 | 16 | 0.10 | ~99.21% |
+| 3 | Compact (≲8k) | Yes | Yes (1×1 conv) | Adam | 0.001 | ~0.01 | OneCycle (cos) | 64 | 16 | 0.025 | ~99.49% |
 
 Notes:
 - Parameter count is reduced from Scenario 1 to 2 via narrower channels and 1×1 transitions; Scenario 3 keeps the model compact while refining the head.
