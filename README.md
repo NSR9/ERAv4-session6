@@ -45,7 +45,7 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
 - **Targets**: Build the skeleton with proper layers and stay under 100k parameters (baseline establishment).
 - **Results**: 9,822 parameters; train max 98.35% (epoch 18); test max 99.14% (epochs 17–19), ~98.9% by epoch ~11.
 - **Analysis**: Strong structure and stable convergence but below 99.4%; schedule is coarse and head minimal. Next, tighten capacity and upgrade LR scheduling.
-- **File Link**: [pidooma.com](https://www.pidooma.com)
+- Here is how I decided the number of params for this model [PIDODMA]([https://www.pidooma.com](https://rationalwiki.org/wiki/PIDOOMA))
 
 ### Scenario 2: Parameter-efficient CNN + OneCycle (SGD) (≈99.2%)
 - **Design goals** (notebook notes):
@@ -73,7 +73,7 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
 - **Targets**: Go under 8k parameters and recover/improve accuracy using a better schedule.
 - **Results**: 5,512 parameters; train max 98.59% (epoch 13); test max 99.24% (epoch 15).
 - **Analysis**: OneCycle with SGD improved generalization and peak accuracy; still shy of 99.4%. Post-GAP head and milder dropout are the next levers.
-- **File Link**: [pidooma.com](https://www.pidooma.com)
+
 
 ### Scenario 3: Head refinement + smaller batch + tuned regularization (≈99.5%)
 - **Architecture refinements**:
@@ -96,7 +96,7 @@ All three scenarios use MNIST with light data augmentation and a compact CNN tra
 - **Targets**: Achieve ≥99.4% in <15 epochs, maintain ≥99.4% through epoch 15, under 8k parameters.
 - **Results**: 7,592 parameters; train max 99.14% (epoch 16); test 99.42–99.54% by epochs 11–15, sustained ≥99.4% to epoch 15.
 - **Analysis**: Post-GAP 1×1 head + smaller batch + reduced dropout + Adam OneCycle delivered the final push and stability.
-- **File Link**: [pidooma.com](https://www.pidooma.com)
+
 
 
 ## Targets and analysis per scenario
